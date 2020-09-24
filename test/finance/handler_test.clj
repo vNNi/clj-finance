@@ -1,14 +1,17 @@
 (ns finance.handler-test
-  (:require [clojure.test :refer :all]
+  (:require [midje.sweet :refer :all]
             [ring.mock.request :as mock]
             [finance.handler :refer :all]))
 
-(deftest test-app
-  (testing "main route"
-    (let [response (app (mock/request :get "/"))]
-      (is (= (:status response) 200))
-      (is (= (:body response) "Hello World"))))
+(facts "Tests to root route"
+  (let [response (app (mock/request :get "/"))]
+  (fact "return 200 status code"
+    (:status response) => 200)
+    
+  (fact "retorna mensagem de Hello World"
+      (:body response) => "Hello World")))
 
-  (testing "not-found route"
-    (let [response (app (mock/request :get "/invalid"))]
-      (is (= (:status response) 404)))))
+(facts "Tests for invalid routes" 
+  (let [response (app (mock/request :get "/invalid"))]
+  (fact "return 404 status code for unknow paths"
+      (:status response) => 404)))
