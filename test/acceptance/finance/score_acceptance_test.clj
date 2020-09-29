@@ -3,7 +3,8 @@
         [midje.sweet :refer :all]
         [finance.handler :refer [app]]
         [ring.adapter.jetty :refer [run-jetty]]
-        [clj-http.client :as http]))
+        [clj-http.client :as http]
+        [cheshire.core :as json]))
 
 (def server (atom nil))
 
@@ -25,6 +26,6 @@
 
 (against-background [(before :facts (start-server d-port))
                     (after :facts (stop-server))]
-                        (fact "return 0 as limit" :acceptance
-                            (content "/limit")) => "0")
+                        (fact "return 0 as score" :acceptance
+                            (json/parse-string (content "/score") true)) => {:score "0"})
 
