@@ -6,7 +6,8 @@
 
 (defroutes app-routes
   (GET "/" [] "Hello World")
-  (GET "/score" [] (json/generate-string { :score "0" }))
+  (GET "/score" [] { :headers { "Content-Type" "application/json; charset=utf8" }
+                    :body (json/generate-string { :score "0" }) })
   (route/not-found "Not Found"))
 
 (def app

@@ -25,4 +25,7 @@
       (:status response) => 200)
 
     (fact "return zero from score" 
-      (:body response) => "xablau")))
+      (:body response) => "xablau")
+    
+    (fact "has application/json in header"
+      (get-in response [:headers "Content-Type"]) => "application/json; charset=utf8")))
