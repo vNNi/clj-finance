@@ -15,3 +15,11 @@
   (let [response (app (mock/request :get "/invalid"))]
   (fact "return 404 status code for unknow paths"
       (:status response) => 404)))
+
+(facts "Tests limit route"
+  (let [response (app (mock/request :get "/limit"))]
+    (fact "return 200 status code"
+      (:status response) => 200)
+
+    (fact "return zero from limit" 
+      (:body response) => "0")))
