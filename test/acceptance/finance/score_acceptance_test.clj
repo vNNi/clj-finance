@@ -25,7 +25,13 @@
 (fact "star and stop server" (start-server 3000) (stop-server))
 
 (against-background [(before :facts (start-server d-port))
-                    (after :facts (stop-server))]
-                        (fact "return 0 as score" :acceptance
-                            (json/parse-string (content "/score") true)) => {:score "0"})
+                     (after :facts (stop-server))]
+
+                (fact "return 0 as score" :acceptance
+                    (json/parse-string (content "/score") true)) => {:score "0"}
+                    
+                (fact "return score as 10" :acceptance
+                    (http/post (build-route "/transaction")
+                        {:body (json/generate-string {:value 10 :type "revenue"})})
+                    (json/parse-string (content "/score") true) => {:value 10}))
 
