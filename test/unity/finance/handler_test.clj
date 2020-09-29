@@ -18,9 +18,11 @@
       (:status response) => 404)))
 
 (facts "Tests score route"
+  ; doing a mock in json/generate-string :P
+  (against-background (json/generate-string { :score "0" }) => "xablau")
   (let [response (app (mock/request :get "/score"))]
     (fact "return 200 status code"
       (:status response) => 200)
 
     (fact "return zero from score" 
-      (json/parse-string (:body response) true) => { :score "0" })))
+      (:body response) => "xablau")))
