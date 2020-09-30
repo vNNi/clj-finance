@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [ring.mock.request :as mock]
             [finance.handler :refer :all]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [finance.db :as db]))
 
 (facts "Tests to root route"
   (let [response (app (mock/request :get "/"))]
@@ -29,3 +30,15 @@
     
     (fact "has application/json in header"
       (get-in response [:headers "Content-Type"]) => "application/json; charset=utf8")))
+
+(facts "Tests transaction route"
+  (against-background (db/register {:value 10 :type "revenue"}) => 
+    {:id 1 :score 10 :type "revenue"})
+  
+    (let [response (app (-> (mock/request :post "/transaction")
+                            (mock/json-body {:value 10 :type "revenue"})))]
+    (fact "return 201 status code" :unity
+      (:status response) => 201)
+    
+    (fact "return a json body"
+      (:body response) => (json/generate-string {:id 1 :score 10 :type "revenue"}))))

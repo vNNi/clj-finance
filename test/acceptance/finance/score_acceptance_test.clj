@@ -33,5 +33,5 @@
                 (fact "return score as 10" :acceptance
                     (http/post (build-route "/transaction")
                         {:body (json/generate-string {:value 10 :type "revenue"})})
-                    (json/parse-string (content "/score") true) => {:value 10}))
+                    (json/parse-string (content "/score") true) => {:score 10}))
 

@@ -8,6 +8,7 @@
   (GET "/" [] "Hello World")
   (GET "/score" [] { :headers { "Content-Type" "application/json; charset=utf8" }
                     :body (json/generate-string { :score "0" }) })
+  (POST "/transaction" [] {})
   (route/not-found "Not Found"))
 
 (def app
