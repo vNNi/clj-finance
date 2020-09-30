@@ -1,3 +1,5 @@
 (ns finance.db)
 
-(declare register)
+(defn register
+    [request]
+    request)

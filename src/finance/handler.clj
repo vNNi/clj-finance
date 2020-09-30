@@ -2,14 +2,23 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [cheshire.core :as json]))
+            [ring.middleware.json :refer [wrap-json-body]]
+            [cheshire.core :as json]
+            [finance.db :as db]))
 
+
+(defn common-response [content & [status]]
+  {:status (or status 200)
+  :headers { "Content-Type" "application/json; charset=utf8" }
+  :body (json/generate-string content)})
+            
 (defroutes app-routes
   (GET "/" [] "Hello World")
-  (GET "/score" [] { :headers { "Content-Type" "application/json; charset=utf8" }
-                    :body (json/generate-string { :score "0" }) })
-  (POST "/transaction" [] {})
+  (GET "/score" [] (common-response { :score "0" }))
+  (POST "/transaction" request (-> (db/register (:body request))
+                                    (common-response 201)))
   (route/not-found "Not Found"))
 
 (def app
-  (wrap-defaults app-routes api-defaults))
+  (-> (wrap-defaults app-routes api-defaults)
+      (wrap-json-body {:keywords? true :bigdecimails? true})))
