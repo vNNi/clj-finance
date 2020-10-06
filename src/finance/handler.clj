@@ -14,8 +14,8 @@
             
 (defroutes app-routes
   (GET "/" [] "Hello World")
-  (GET "/score" [] (common-response { :score "0" }))
-  (POST "/transaction" request (-> (db/register (:body request))
+  (GET "/score" [] (common-response { :score (db/score) }))
+  (POST "/transaction" request (-> (db/register! (:body request))
                                     (common-response 201)))
   (route/not-found "Not Found"))
 
