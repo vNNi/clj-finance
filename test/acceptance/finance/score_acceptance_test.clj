@@ -5,7 +5,7 @@
         [ring.adapter.jetty :refer [run-jetty]]
         [clj-http.client :as http]
         [cheshire.core :as json]
-        [finance.db :refer [clear]]))
+        [finance.db :as db]))
 
 (def server (atom nil))
 
@@ -26,7 +26,7 @@
 (fact "star and stop server" (start-server 3000) (stop-server))
 
 (against-background [(before :facts [(start-server d-port)
-                                     (clear)])
+                                     (db/clear)])
                      (after :facts (stop-server))]
 
                 (fact "return 0 as score" :acceptance
@@ -37,5 +37,17 @@
                         {:content-type :json
                          :body (json/generate-string {:value 10 :type "revenue"})})
 
-                    (json/parse-string (content "/score") true) => {:score 10}))
+                    (json/parse-string (content "/score") true) => {:score 10})
 
+                (fact "the score is 1000 when create two revenues with 2000 and a expense with 3000" :acceptance
+                    (http/post (build-route "/transaction") 
+                        {:content-type :json
+                        :body (json/generate-string {:value 2000 :type "revenue"})})
+
+                        (http/post (build-route "/transaction") 
+                            {:content-type :json
+                            :body (json/generate-string {:value 2000 :type "revenue"})})
+                        (http/post (build-route "/transaction") 
+                            {:content-type :json
+                            :body (json/generate-string {:value 3000 :type "expense"})})
+                        (json/parse-string (content "/score") true) => {:score 1000}))
