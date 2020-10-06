@@ -4,7 +4,8 @@
         [finance.handler :refer [app]]
         [ring.adapter.jetty :refer [run-jetty]]
         [clj-http.client :as http]
-        [cheshire.core :as json]))
+        [cheshire.core :as json]
+        [finance.db :refer [clear]]))
 
 (def server (atom nil))
 
@@ -24,11 +25,12 @@
 
 (fact "star and stop server" (start-server 3000) (stop-server))
 
-(against-background [(before :facts (start-server d-port))
+(against-background [(before :facts [(start-server d-port)
+                                     (clear)])
                      (after :facts (stop-server))]
 
                 (fact "return 0 as score" :acceptance
-                    (json/parse-string (content "/score") true) => {:score "0"})
+                    (json/parse-string (content "/score") true) => {:score 0})
                     
                 (fact "return score as 10" :acceptance
                     (http/post (build-route "/transaction")

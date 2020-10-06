@@ -20,7 +20,8 @@
 
 (facts "Tests score route"
   ; doing a mock in json/generate-string :P
-  (against-background (json/generate-string { :score "0" }) => "xablau")
+  (against-background [(json/generate-string { :score "0" }) => "xablau"
+                        (db/score) => "0"])
   (let [response (app (mock/request :get "/score"))]
     (fact "return 200 status code"
       (:status response) => 200)
@@ -32,7 +33,7 @@
       (get-in response [:headers "Content-Type"]) => "application/json; charset=utf8")))
 
 (facts "Tests transaction route"
-  (against-background (db/register {:value 10 :type "revenue"}) => 
+  (against-background (db/register! {:value 10 :type "revenue"}) => 
     {:id 1 :score 10 :type "revenue"})
   
     (let [response (app (-> (mock/request :post "/transaction")
