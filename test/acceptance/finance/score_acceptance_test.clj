@@ -5,6 +5,7 @@
         [ring.adapter.jetty :refer [run-jetty]]
         [clj-http.client :as http]
         [cheshire.core :as json]
+        [finance.helpers :refer :all]
         [finance.db :as db]))
 
 (def server (atom nil))
@@ -34,20 +35,32 @@
                     
                 (fact "return score as 10" :acceptance
                     (http/post (build-route "/transaction")
-                        {:content-type :json
-                         :body (json/generate-string {:value 10 :type "revenue"})})
+                        (content-as-json (revenue 10)))
 
                     (json/parse-string (content "/score") true) => {:score 10})
 
                 (fact "the score is 1000 when create two revenues with 2000 and a expense with 3000" :acceptance
                     (http/post (build-route "/transaction") 
-                        {:content-type :json
-                        :body (json/generate-string {:value 2000 :type "revenue"})})
+                        (content-as-json (revenue 2000)))
 
                         (http/post (build-route "/transaction") 
-                            {:content-type :json
-                            :body (json/generate-string {:value 2000 :type "revenue"})})
+                            (content-as-json (revenue 2000)))
                         (http/post (build-route "/transaction") 
-                            {:content-type :json
-                            :body (json/generate-string {:value 3000 :type "expense"})})
-                        (json/parse-string (content "/score") true) => {:score 1000}))
+                            (content-as-json (expense 3000)))
+                        (json/parse-string (content "/score") true) => {:score 1000})
+
+                (fact "reject transaction whithout value" :acceptance
+                    (let [response (http/post (build-route "/transaction") (content-as-json {:type "revenue"}))]
+                        (:status response ) => 422 ))
+                
+                (fact "reject transaction with negative value" :acceptance
+                    (let [response (http/post (build-route "/transaction") (content-as-json (revenue -1000)))]
+                        (:status response ) => 422 ))
+                
+                (fact "reject transaction whithout type" :acceptance
+                    (let [response (http/post (build-route "/transaction") (content-as-json {:value 1000}))]
+                        (:status response ) => 422 ))
+
+                (fact "reject transaction with unknow type" :acceptance
+                        (let [response (http/post (build-route "/transaction") (content-as-json {:type "cdi" :value 100}))]
+                            (:status response ) => 422 )))
